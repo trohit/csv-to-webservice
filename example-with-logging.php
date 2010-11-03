@@ -19,7 +19,7 @@
   $content = csvtoservice(
     'http://winterolympicsmedals.com/medals.csv',
     array(
-      'filter'=> array('eventgender','city'),
+      'filter'=> array('city'),
       'rename'=> array(
         'noc'=>'country'
       ),
@@ -28,9 +28,21 @@
       ),
       'prefill'=> array(
         'discipline'=> 'Alpine Skiing',
-        'medal'=> 'Gold'
       ),
-      'uppercase'=>true
+      'uppercase'=>true,
+      'choices'=> array(
+	      'medal'=> array(
+		      "Gold",
+		      "Silver",
+		      "Bronze",
+	      ),
+      ),
+      'notinform'=> array(
+	      'eventgender',
+      ),
+      'grep_specific'=> array(
+	      'sport',
+      ),
     )
  );
 

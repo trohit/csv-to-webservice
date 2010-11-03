@@ -1,4 +1,3 @@
-<?php error_reporting(0);?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
@@ -27,7 +26,7 @@
   $content = csvtoservice(
     'http://winterolympicsmedals.com/medals.csv',
     array(
-      'filter'=> array('eventgender','city'),
+      'filter'=> array('city'),
       'rename'=> array(
         'noc'=>'country'
       ),
@@ -36,9 +35,21 @@
       ),
       'prefill'=> array(
         'discipline'=> 'Alpine Skiing',
-        'medal'=> 'Gold'
       ),
-      'uppercase'=>true
+      'uppercase'=>true,
+      'choices'=> array(
+	      'medal'=> array(
+		      "Gold",
+		      "Silver",
+		      "Bronze",
+	      ),
+      ),
+      'notinform'=> array(
+	      'eventgender',
+      ),
+      'grep_specific'=> array(
+	      'sport',
+      ),
     )
  );
 
@@ -64,27 +75,36 @@
 <p>The above search form and table result is powered by a simple dataset: <a href="http://winterolympicsmedals.com/medals.csv">http://winterolympicsmedals.com/medals.csv</a>. All you need to convert it to what you see above is the following code in your PHP documents:</p>
 
 <pre><code>&lt;?php 
-  include(&#x27;csvtoservice.php&#x27;);
-  $content = csvtoservice(
-    &#x27;http://winterolympicsmedals.com/medals.csv&#x27;,
-    array(
-      &#x27;filter&#x27;=&gt; array(
-        &#x27;eventgender&#x27;,
-        &#x27;city&#x27;
-      ),
-      &#x27;rename&#x27;=&gt; array(
-        &#x27;noc&#x27;=&gt;&#x27;country&#x27;
-      ),
-      &#x27;preset&#x27;=&gt; array(
-        &#x27;year&#x27;=&gt; &#x27;1992&#x27;
-      ),
-      &#x27;prefill&#x27;=&gt; array(
-        &#x27;discipline&#x27;=&gt; &#x27;Alpine Skiing&#x27;,
-        &#x27;medal&#x27;=&gt; &#x27;Gold&#x27;
-      ),
-      &#x27;uppercase&#x27;=&gt;true
-    )
-  );
+&nbsp;&nbsp;include('csvtoservice.php');
+&nbsp;&nbsp;$content = csvtoservice(
+&nbsp;&nbsp;&nbsp;&nbsp;'<a href="http://winterolympicsmedals.com/medals.csv">http://winterolympicsmedals.com/medals.csv</a>',
+&nbsp;&nbsp;&nbsp;&nbsp;array(
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'filter'=&gt; array('city'),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'rename'=&gt; array(
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'noc'=&gt;'country'
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'preset'=&gt; array(
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'year'=&gt; '1992'
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'prefill'=&gt; array(
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'discipline'=&gt; 'Alpine Skiing',
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'uppercase'=&gt;true,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'choices'=&gt; array(
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'medal'=&gt; array(
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;Gold&quot;,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;Silver&quot;,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;Bronze&quot;,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'notinform'=&gt; array(
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'eventgender',
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'grep_specific'=&gt; array(
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'sport',
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;),
+&nbsp;&nbsp;&nbsp;&nbsp;)
+&nbsp;);
   if($content){
 
     if($content[&#x27;form&#x27;]){
@@ -135,6 +155,7 @@
   <li><code>$myservice['table']</code> - the data table of the information returned by the form submission - this will only show up once the form is submitted.</li>
   <li><code>$myservice['json']</code> - the data in raw JSON format (for debugging).</li>
   <li><code>$myservice['yql']</code> - the YQL statement (for debugging).</li>
+  <li><code>$myservice['num_matches']</code> - the number of matches found.</li>
 </ul>
 
 <p>You can see all of the information in the <a href="example-with-logging.php">example with logging</a>.</p>
@@ -167,6 +188,9 @@
   <li><code>preset</code> is an array of fields to preset with a hard value. These fields will be part of the query of the data but will not be added to the form or displayed. This allows you to pre-filter the data. In the above example this was the year of the games.</li>
   <li><code>prefill</code> is an array of fields to pre-fill the form with in case you want to give the end user a hint what they can search for.</li>
   <li><code>uppercase</code> is an boolean value if the script should uppercase the first letter of the field name or not ("City" instead of "city").</li>
+  <li><code>choices</code> is an array of options of which any one can be chosen. In the above example, medals can only be Gold, Silver or Bronze.</li> 
+  <li><code>notinform</code> is an array of fields that do not show in form but are shown in the results.</li> 
+  <li><code>grep_specific</code> is an array of fields for which the sql query performs an exact match instead of a LIKE.</li> 
 </ul>
 <p>That's it, really... Have fun!</p>
   </div>
